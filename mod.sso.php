@@ -182,6 +182,57 @@ class Sso {
 	}
 	
 	/**
+	 * Allows you to display information about the authorized user
+	 *
+	 * <code>
+	 *   {exp:sso:user_info}
+	 *     {if has_sso_id}...{/if}
+	 *     {sso_id}
+	 *     {sso_first-name}
+	 *     {sso_last-name}
+	 *   {/exp:sso:user_info}
+	 * </code>
+	 */
+	public function user_info()
+	{
+		$tagdata = $this->EE->TMPL->tagdata;
+		
+		// parse conditionals
+		$conditionals['has_sso_id'] = empty($_SESSION['sso_id']) ? FALSE : TRUE;
+		$tagdata = $this->EE->functions->prep_conditionals($tagdata, $conditionals);
+		
+		// we found a sso id!
+		if( ! empty($_SESSION['sso_id']))
+		{
+			// get the user from the sso_accounts table
+			$user = $this->EE->db->get_where('sso_accounts', array(
+				'sso_id' => $_SESSION['sso_id'],
+			), 1);
+			
+			if($user->num_rows() > 0)
+			{
+				// parse the template tags
+				$vars = array(
+					'sso_id' => $_SESSION['sso_id'],
+				);
+				$data = json_decode($user->row('data'));
+				
+				foreach($data as $prop => $val)
+				{
+					$vars['sso_'.$prop] = htmlspecialchars($val);
+				}
+				
+				$tagdata = $this->EE->TMPL->parse_variables_row($tagdata, $vars);
+			}
+		}
+		
+		// wipe out any remaining sso tags
+		$tagdata = preg_replace('#\{sso_.+?\}#i', '', $tagdata);
+		
+		return $tagdata;
+	}
+	
+	/**
 	 * Run on instantiation
 	 */
 	private function initialize()
