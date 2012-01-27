@@ -130,6 +130,18 @@ class Sso {
 			$_SESSION['sso_id'] = $this->EE->db->insert_id();
 		}
 		
+		// if the user is logged in, link the accounts
+		if($this->EE->session->userdata('member_id') != 0 && ! empty($_SESSION['sso_id']))
+		{
+			$this->EE->db->where('sso_id', $_SESSION['sso_id'])->limit(1)->update('sso_accounts', array(
+				'member_id' => $this->EE->session->userdata('member_id'),
+			));
+			
+			unset($_SESSION['sso_id']);
+			
+			$this->EE->functions->redirect('/account');
+		}
+		
 		// redirect them to the registration form
 		$this->EE->functions->redirect('/'.$redirect);
 	}
