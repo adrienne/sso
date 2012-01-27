@@ -120,6 +120,7 @@ class Facebook_provider extends Provider {
 			)));
 		}
 		
+		// return the user id
 		return $user;
 	}
 	
