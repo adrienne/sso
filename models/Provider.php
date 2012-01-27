@@ -11,4 +11,6 @@ abstract class Provider {
 	
 	abstract public function register_finish();
 	
+	abstract public function login($redirect);
+	
 }

@@ -111,6 +111,43 @@ class Sso {
 	}
 	
 	/**
+	 * Login via a provider
+	 */
+	public function login()
+	{
+		$provider = $this->EE->TMPL->fetch_param('provider');
+		$redirect = $this->EE->TMPL->fetch_param('redirect');
+		
+		// if user is already logged in, redirect
+		if($this->EE->session->userdata('member_id'))
+		{
+			$this->EE->functions->redirect('/'.$redirect);
+		}
+		
+		// get the provider's user id
+		$user_id = static::$providers[$provider]->login($redirect);
+		
+		// find user in database
+		$user = $this->EE->db->select('member_id')->get_where('sso_accounts', array(
+			'provider' => $provider,
+			'user_id' => $user_id,
+		), 1);
+		
+		// we found the user, so let's log them in
+		if($user->num_rows() > 0 && $user->row('member_id') != NULL)
+		{
+			$this->EE->session->create_new_session($user->row('member_id'));
+			
+			unset($_SESSION['sso_id']);
+			
+			$this->EE->functions->redirect('/'.$redirect);
+		}
+		
+		// show error if we can't log them in
+		$this->EE->output->show_user_error('general', 'Sorry, we couldn\'t log you in.');
+	}
+	
+	/**
 	 * Run on instantiation
 	 */
 	private function initialize()

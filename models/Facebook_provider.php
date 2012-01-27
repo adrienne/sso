@@ -15,6 +15,11 @@ class Facebook_provider extends Provider {
 	const APP_SECRET = 'beb2ee995165fb0da4cc47964ab01881';
 	
 	/**
+	 * @var array
+	 */
+	private $permissions = array('email');
+	
+	/**
 	 * Constructor
 	 */
 	public function __construct()
@@ -38,7 +43,7 @@ class Facebook_provider extends Provider {
 		// go to facebook for authorization
 		$this->EE->functions->redirect($this->facebook->getLoginUrl(array(
 			'redirect_uri' => $redirect,
-			'scope' => array('email'),
+			'scope' => $this->permissions,
 		)));
 	}
 	
@@ -93,6 +98,29 @@ class Facebook_provider extends Provider {
 		{
 			return FALSE;
 		}
+	}
+	
+	/**
+	 * Login with the this provider
+	 *
+	 * @param	string
+	 * @return	string
+	 */
+	public function login($redirect)
+	{
+		$user = $this->facebook->getUser();
+		
+		if( ! $user)
+		{
+			$redirect = $this->EE->functions->create_url($this->EE->uri->uri_string());
+			
+			$this->EE->functions->redirect($this->facebook->getLoginUrl(array(
+				'redirect_uri' => $redirect,
+				'scope' => $this->permissions,
+			)));
+		}
+		
+		return $user;
 	}
 	
 }
