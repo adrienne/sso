@@ -50,6 +50,8 @@ class Sso {
 		$provider = $this->EE->TMPL->fetch_param('provider');
 		$callback = $this->EE->TMPL->fetch_param('callback_uri', $this->EE->uri->uri_string());
 		
+		$this->validate_provider($provider);
+		
 		static::$providers[$provider]->register_start($this->EE->functions->create_url($callback));
 	}
 	
@@ -61,12 +63,18 @@ class Sso {
 		$provider = $this->EE->TMPL->fetch_param('provider');
 		$redirect = $this->EE->TMPL->fetch_param('redirect');
 		
+		$this->validate_provider($provider);
+		
 		$result = static::$providers[$provider]->register_finish();
 		
 		// registration failed for some reason
 		if($result === FALSE)
 		{
-			$this->EE->output->show_user_error('general', 'Sorry, but something went wrong during registration.');
+			$this->EE->output->show_message(array(
+				'title' => 'Social Sign On Error',
+				'heading' => 'Social Sign On Error',
+				'content' => '<p>Sorry, but something went wrong during registration.</p>',
+			));
 		}
 		
 		// check to see if this user has authorized before
@@ -81,7 +89,11 @@ class Sso {
 			// if they already have a member id, don't let them register
 			if($user->row('member_id') != NULL)
 			{
-				$this->EE->output->show_user_error('general', 'You have already registered with this provider.');
+				$this->EE->output->show_message(array(
+					'title' => 'Social Sign On Error',
+					'heading' => 'Social Sign On Error',
+					'content' => '<p>You have already registered with this provider.</p>',
+				));
 			}
 			
 			// update their information so that the registration form is up to date
@@ -118,6 +130,8 @@ class Sso {
 		$provider = $this->EE->TMPL->fetch_param('provider');
 		$redirect = $this->EE->TMPL->fetch_param('redirect');
 		
+		$this->validate_provider($provider);
+		
 		// if user is already logged in, redirect
 		if($this->EE->session->userdata('member_id'))
 		{
@@ -144,7 +158,11 @@ class Sso {
 		}
 		
 		// show error if we can't log them in
-		$this->EE->output->show_user_error('general', 'Sorry, we couldn\'t log you in.');
+		$this->EE->output->show_message(array(
+			'title' => 'Social Sign On Error',
+			'heading' => 'Social Sign On Error',
+			'content' => '<p>Sorry, we couldn\'t log you in.</p>',
+		));
 	}
 	
 	/**
@@ -185,6 +203,23 @@ class Sso {
 					static::$providers[$provider] = new $class;
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Ensures that the requested provider is available
+	 *
+	 * @param	string
+	 */
+	private function validate_provider($provider)
+	{
+		if( ! in_array(strtolower($provider), array_keys(static::$providers)))
+		{
+			$this->EE->output->show_message(array(
+				'title' => 'Social Sign On Error',
+				'heading' => 'Social Sign On Error',
+				'content' => '<p>This provider is not available.</p>',
+			));
 		}
 	}
 	
