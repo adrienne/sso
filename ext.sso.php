@@ -53,6 +53,8 @@ class Sso_ext {
 		$hooks = array(
 			'member_member_login_single' => 'member_member_login_single',
 			'member_member_logout' => 'member_member_logout',
+			'user_register_end' => 'user_register_end',
+			'sessions_start' => 'sessions_start',
 		);
 		
 		foreach($hooks as $hook => $method)
@@ -86,6 +88,37 @@ class Sso_ext {
 	public function member_member_logout()
 	{
 		
+	}
+	
+	/**
+	 * User registration
+	 *
+	 * @param	object
+	 * @param	int
+	 */
+	public function user_register_end($user, $member_id)
+	{
+		if( ! empty($_SESSION['sso_id']))
+		{
+			// update the sso accounts table
+			$this->EE->db->where('sso_id', $_SESSION['sso_id'])->limit(1)->update('sso_accounts', array(
+				'member_id' => $member_id,
+			));
+			
+			unset($_SESSION['sso_id']);
+		}
+	}
+	
+	/**
+	 * Run on session start
+	 */
+	public function sessions_start($session)
+	{
+		// start a native php session if we don't have one
+		if( ! session_id())
+		{
+			session_start();
+		}
 	}
 	
 	/**

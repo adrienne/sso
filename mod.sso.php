@@ -237,9 +237,6 @@ class Sso {
 	 */
 	private function initialize()
 	{
-		// start the session
-		session_start();
-		
 		// get settings if we haven't already done so
 		if( ! static::$settings)
 		{
