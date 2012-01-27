@@ -44,6 +44,12 @@ class Sso {
 	
 	/**
 	 * Start the registration process
+	 *
+	 * Handles the authorization with the provider.
+	 *
+	 * <code>
+	 *   {exp:sso:register_start provider="facebook" callback_uri="register/facebook/callback"}
+	 * </code>
 	 */
 	public function register_start()
 	{
@@ -57,6 +63,12 @@ class Sso {
 	
 	/**
 	 * Finish the registration process
+	 *
+	 * This will not create the actual EE account, but should redirect to a form to do so.
+	 *
+	 * <code>
+	 *   {exp:sso:register_finish provider="facebook" redirect="register"}
+	 * </code>
 	 */
 	public function register_finish()
 	{
@@ -124,6 +136,10 @@ class Sso {
 	
 	/**
 	 * Login via a provider
+	 *
+	 * <code>
+	 *   {exp:sso:login provider="facebook" redirect="account"}
+	 * </code>
 	 */
 	public function login()
 	{
