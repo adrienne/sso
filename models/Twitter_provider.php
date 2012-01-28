@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../libraries/twitter/twitteroauth.php';
+require_once __DIR__.'/../libraries/twitter/tmhOAuth.php';
 
 class Twitter_provider extends Provider {
 	
@@ -15,14 +15,19 @@ class Twitter_provider extends Provider {
 	const CONSUMER_SECRET = 'bAneplyrXeiYfC0O7AckGAe7foyKCiIbPxdPiLriN4';
 	
 	/**
-	 * Constructor
+	 * @var	object
 	 */
+	private $twitter;
+	
 	public function __construct()
 	{
 		parent::__construct();
 		
 		// setup sdk
-		$this->twitter = new TwitterOAuth(self::CONSUMER_KEY, self::CONSUMER_SECRET);
+		$this->twitter = new tmhOAuth(array(
+			'consumer_key' => self::CONSUMER_KEY,
+			'consumer_secret' => self::CONSUMER_SECRET,
+		));
 	}
 	
 	/**
@@ -32,67 +37,93 @@ class Twitter_provider extends Provider {
 	 */
 	public function register_start($redirect)
 	{
-		$token = $this->twitter->getRequestToken($redirect);
+		$status = $this->twitter->request('POST', $this->twitter->url('oauth/request_token', ''), array(
+			'oauth_callback' => $redirect,
+		));
 		
-		$_SESSION['oauth_token'] = $token['oauth_token'];
-		$_SESSION['oauth_token_secret'] = $token['oauth_token_secret'];
+		if($status === 200)
+		{
+			$_SESSION['oauth'] = $this->twitter->extract_params($this->twitter->response['response']);
+			
+			$this->EE->functions->redirect($this->twitter->url('oauth/authorize', '') . "?oauth_token={$_SESSION['oauth']['oauth_token']}");
+		}
 		
-		$this->EE->functions->redirect($this->twitter->getAuthorizeURL($_SESSION['oauth_token']));
+		// TODO: fail here
 	}
 	
 	/**
 	 * Finish the registration process
-	 *
-	 * @return	array|bool
 	 */
 	public function register_finish()
 	{
-		if( ! $this->EE->input->get('oauth_verifier'))
+		if( ! $this->EE->input->get_post('oauth_verifier'))
 		{
 			return FALSE;
 		}
 		
-		$this->twitter = new TwitterOAuth(self::CONSUMER_KEY, self::CONSUMER_SECRET, $_SESSION['oauth_token'], $_SESSION['oauth_token_secret']);
+		// add oauth tokens to sdk
+		$this->twitter->config['user_token'] = $_SESSION['oauth']['oauth_token'];
+		$this->twitter->config['user_secret'] = $_SESSION['oauth']['oauth_token_secret'];
 		
-		$access_token = $this->twitter->getAccessToken($this->EE->input->get('oauth_verifier'));
-		
-		$user = $this->twitter->get('account/verify_credentials');
-		
-		// build profile information
-		$profile = json_encode(array(
-			'first-name' => '',
-			'middle-initial' => '',
-			'last-name' => '',
-			'employer' => '',
-			'email' => '',
-			'phone' => '',
-			'address' => '',
-			'address2' => '',
-			'city' => '',
-			'state-province' => '',
-			'postal-code' => '',
-			'country' => '',
-			'gender' => '',
-			'bday_m' => '',
-			'bday_d' => '',
-			'bday_y' => '',
-			'occupation' => '',
-			'username' => $user->screen_name,
+		// request access token
+		$status = $this->twitter->request('POST', $this->twitter->url('oauth/access_token', ''), array(
+			'oauth_verifier' => $this->EE->input->get_post('oauth_verifier'),
 		));
 		
-		$data = array(
-			'user_id' => $user->id_str,
-			'data' => $profile,
-		);
+		if($status === 200)
+		{
+			$_SESSION['access_token'] = $this->twitter->extract_params($this->twitter->response['response']);
+			
+			unset($_SESSION['oauth']);
+			
+			// reconfigure the sdk with new tokens
+			$this->twitter->config['user_token'] = $_SESSION['access_token']['oauth_token'];
+			$this->twitter->config['user_secret'] = $_SESSION['access_token']['oauth_token_secret'];
+			
+			// get user info
+			$status = $this->twitter->request('GET', $this->twitter->url('1/account/verify_credentials'));
+			
+			if($status === 200)
+			{
+				$user = json_decode($this->twitter->response['response']);
+				
+				$profile = json_encode(array(
+					'first-name' => '',
+					'middle-initial' => '',
+					'last-name' => '',
+					'employer' => '',
+					'email' => '',
+					'phone' => '',
+					'address' => '',
+					'address2' => '',
+					'city' => '',
+					'state-province' => '',
+					'postal-code' => '',
+					'country' => '',
+					'gender' => '',
+					'bday_m' => '',
+					'bday_d' => '',
+					'bday_y' => '',
+					'occupation' => '',
+					'username' => $user->screen_name,
+				));
+				
+				$data = array(
+					'user_id' => $user->id_str,
+					'data' => $profile,
+				);
+				
+				return $data;
+			}
+		}
 		
-		return $data;
+		return FALSE;
 	}
 	
 	/**
-	 * Login with the this provider
+	 * Login
 	 *
 	 * @param	string
-	 * @return	string
 	 */
 	public function login($redirect)
 	{
