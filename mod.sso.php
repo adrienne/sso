@@ -137,8 +137,6 @@ class Sso {
 				'member_id' => $this->EE->session->userdata('member_id'),
 			));
 			
-			unset($_SESSION['sso_id']);
-			
 			$this->EE->functions->redirect('/account');
 		}
 		
@@ -167,7 +165,7 @@ class Sso {
 		}
 		
 		// get the provider's user id
-		$user_id = static::$providers[$provider]->login($redirect);
+		$user_id = static::$providers[$provider]->login();
 		
 		if($user_id !== FALSE)
 		{
@@ -182,7 +180,7 @@ class Sso {
 			{
 				$this->EE->session->create_new_session($user->row('member_id'));
 				
-				unset($_SESSION['sso_id']);
+				$_SESSION['sso_id'] = $user_id;
 				
 				$this->EE->functions->redirect('/'.$redirect);
 			}
@@ -207,6 +205,8 @@ class Sso {
 	 *     {sso_last-name}
 	 *   {/exp:sso:user_info}
 	 * </code>
+	 *
+	 * @return	string
 	 */
 	public function user_info()
 	{

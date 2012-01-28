@@ -11,8 +11,14 @@
  */
 class Sso_upd {
 	
+	/**
+	 * @var	string
+	 */
 	public $version = '1.0';
 	
+	/**
+	 * @var	object
+	 */
 	private $EE;
 	
 	/**

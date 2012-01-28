@@ -11,10 +11,19 @@
  */
 class Sso_mcp {
 	
+	/**
+	 * @var	string
+	 */
 	public $return_data;
 	
+	/**
+	 * @var	string
+	 */
 	private $_base_url;
 	
+	/**
+	 * @var	object
+	 */
 	private $EE;
 	
 	/**

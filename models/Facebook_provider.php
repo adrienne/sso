@@ -106,7 +106,7 @@ class Facebook_provider extends Provider {
 	 * @param	string
 	 * @return	string
 	 */
-	public function login($redirect)
+	public function login()
 	{
 		$user = $this->facebook->getUser();
 		

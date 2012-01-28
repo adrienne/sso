@@ -11,13 +11,39 @@
  */
 class Sso_ext {
 	
+	/**
+	 * @var	array
+	 */
 	public $settings = array();
+	
+	/**
+	 * @var	string
+	 */
 	public $description = 'TBD...';
+	
+	/**
+	 * @var	string
+	 */
 	public $docs_url = '';
+	
+	/**
+	 * @var	string
+	 */
 	public $name = 'Social Sign On';
+	
+	/**
+	 * @var	string
+	 */
 	public $settings_exist = 'y';
+	
+	/**
+	 * @var	string
+	 */
 	public $version = '1.0';
 	
+	/**
+	 * @var	object
+	 */
 	private $EE;
 	
 	/**
@@ -79,7 +105,7 @@ class Sso_ext {
 	 */
 	public function member_member_login_single($row)
 	{
-		
+		// TODO
 	}
 	
 	/**
@@ -87,7 +113,7 @@ class Sso_ext {
 	 */
 	public function member_member_logout()
 	{
-		
+		// TODO
 	}
 	
 	/**
@@ -143,6 +169,11 @@ class Sso_ext {
 		}
 	}
 	
+	/**
+	 * Allows easy access to the settings from other classes
+	 *
+	 * @return	array
+	 */
 	public static function get_settings()
 	{
 		return $this->settings;
