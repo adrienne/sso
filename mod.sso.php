@@ -169,20 +169,23 @@ class Sso {
 		// get the provider's user id
 		$user_id = static::$providers[$provider]->login($redirect);
 		
-		// find user in database
-		$user = $this->EE->db->select('member_id')->get_where('sso_accounts', array(
-			'provider' => $provider,
-			'user_id' => $user_id,
-		), 1);
-		
-		// we found the user, so let's log them in
-		if($user->num_rows() > 0 && $user->row('member_id') != NULL)
+		if($user_id !== FALSE)
 		{
-			$this->EE->session->create_new_session($user->row('member_id'));
+			// find user in database
+			$user = $this->EE->db->select('member_id')->get_where('sso_accounts', array(
+				'provider' => $provider,
+				'user_id' => $user_id,
+			), 1);
 			
-			unset($_SESSION['sso_id']);
-			
-			$this->EE->functions->redirect('/'.$redirect);
+			// we found the user, so let's log them in
+			if($user->num_rows() > 0 && $user->row('member_id') != NULL)
+			{
+				$this->EE->session->create_new_session($user->row('member_id'));
+				
+				unset($_SESSION['sso_id']);
+				
+				$this->EE->functions->redirect('/'.$redirect);
+			}
 		}
 		
 		// show error if we can't log them in
