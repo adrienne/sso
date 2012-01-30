@@ -124,14 +124,14 @@ class Sso_ext {
 	 */
 	public function user_register_end($user, $member_id)
 	{
-		if( ! empty($_SESSION['sso_id']))
+		if( ! empty($_SESSION['sso']['sso_id']))
 		{
 			// update the sso accounts table
-			$this->EE->db->where('sso_id', $_SESSION['sso_id'])->limit(1)->update('sso_accounts', array(
+			$this->EE->db->where('sso_id', $_SESSION['sso']['sso_id'])->limit(1)->update('sso_accounts', array(
 				'member_id' => $member_id,
 			));
 			
-			unset($_SESSION['sso_id']);
+			unset($_SESSION['sso']);
 		}
 	}
 	

@@ -44,7 +44,7 @@ class Twitter_provider extends Provider {
 		
 		if($success === TRUE)
 		{
-			$this->EE->functions->redirect($this->twitter->url('oauth/authorize', '') . "?oauth_token={$_SESSION['oauth']['oauth_token']}");
+			$this->EE->functions->redirect($this->twitter->url('oauth/authorize', '') . "?oauth_token={$_SESSION['sso']['oauth']['oauth_token']}");
 		}
 		
 		// TODO: make this better
@@ -117,16 +117,16 @@ class Twitter_provider extends Provider {
 	public function login()
 	{
 		// skip a lot of this mess if we already have an access token
-		if( ! empty($_SESSION['access_token']))
+		if( ! empty($_SESSION['sso']['access_token']))
 		{
-			$this->twitter->config['user_token'] = $_SESSION['access_token']['oauth_token'];
-			$this->twitter->config['user_secret'] = $_SESSION['access_token']['oauth_token_secret'];
+			$this->twitter->config['user_token'] = $_SESSION['sso']['access_token']['oauth_token'];
+			$this->twitter->config['user_secret'] = $_SESSION['sso']['access_token']['oauth_token_secret'];
 			
 			goto verify_credentials;
 		}
 		
 		// get request token if we haven't already
-		if(empty($_SESSION['oauth']))
+		if(empty($_SESSION['sso']['oauth']))
 		{
 			$redirect = $this->EE->functions->create_url($this->EE->uri->uri_string());
 			
@@ -134,14 +134,14 @@ class Twitter_provider extends Provider {
 			
 			if($success === TRUE)
 			{
-				$this->EE->functions->redirect($this->twitter->url('oauth/authenticate', '') . "?oauth_token={$_SESSION['oauth']['oauth_token']}");
+				$this->EE->functions->redirect($this->twitter->url('oauth/authenticate', '') . "?oauth_token={$_SESSION['sso']['oauth']['oauth_token']}");
 			}
 		}
 		
 		// if request was denied, fail
 		if( ! $this->EE->input->get_post('oauth_verifier'))
 		{
-			unset($_SESSION['oauth']);
+			unset($_SESSION['sso']['oauth']);
 			
 			return FALSE;
 		}
@@ -180,7 +180,7 @@ class Twitter_provider extends Provider {
 		// set the session info
 		if($code === 200)
 		{
-			$_SESSION['oauth'] = $this->twitter->extract_params($this->twitter->response['response']);
+			$_SESSION['sso']['oauth'] = $this->twitter->extract_params($this->twitter->response['response']);
 			
 			return TRUE;
 		}
@@ -197,8 +197,8 @@ class Twitter_provider extends Provider {
 	private function get_access_token($verifier)
 	{
 		// add request tokens to sdk
-		$this->twitter->config['user_token'] = $_SESSION['oauth']['oauth_token'];
-		$this->twitter->config['user_secret'] = $_SESSION['oauth']['oauth_token_secret'];
+		$this->twitter->config['user_token'] = $_SESSION['sso']['oauth']['oauth_token'];
+		$this->twitter->config['user_secret'] = $_SESSION['sso']['oauth']['oauth_token_secret'];
 		
 		// get the access token
 		$code = $this->twitter->request('POST', $this->twitter->url('oauth/access_token', ''), array(
@@ -207,13 +207,13 @@ class Twitter_provider extends Provider {
 		
 		if($code === 200)
 		{
-			$_SESSION['access_token'] = $this->twitter->extract_params($this->twitter->response['response']);
+			$_SESSION['sso']['access_token'] = $this->twitter->extract_params($this->twitter->response['response']);
 			
-			unset($_SESSION['oauth']);
+			unset($_SESSION['sso']['oauth']);
 			
 			// reconfigure the sdk with new tokens
-			$this->twitter->config['user_token'] = $_SESSION['access_token']['oauth_token'];
-			$this->twitter->config['user_secret'] = $_SESSION['access_token']['oauth_token_secret'];
+			$this->twitter->config['user_token'] = $_SESSION['sso']['access_token']['oauth_token'];
+			$this->twitter->config['user_secret'] = $_SESSION['sso']['access_token']['oauth_token_secret'];
 			
 			return TRUE;
 		}

@@ -116,7 +116,7 @@ class Sso {
 				'data' => $result['data'],
 			));
 			
-			$_SESSION['sso_id'] = $user->row('sso_id');
+			$_SESSION['sso']['sso_id'] = $user->row('sso_id');
 		}
 		else
 		{
@@ -127,13 +127,13 @@ class Sso {
 				'data' => $result['data'],
 			));
 			
-			$_SESSION['sso_id'] = $this->EE->db->insert_id();
+			$_SESSION['sso']['sso_id'] = $this->EE->db->insert_id();
 		}
 		
 		// if the user is logged in, link the accounts
-		if($this->EE->session->userdata('member_id') != 0 && ! empty($_SESSION['sso_id']))
+		if($this->EE->session->userdata('member_id') != 0 && ! empty($_SESSION['sso']['sso_id']))
 		{
-			$this->EE->db->where('sso_id', $_SESSION['sso_id'])->limit(1)->update('sso_accounts', array(
+			$this->EE->db->where('sso_id', $_SESSION['sso']['sso_id'])->limit(1)->update('sso_accounts', array(
 				'member_id' => $this->EE->session->userdata('member_id'),
 			));
 			
@@ -180,7 +180,7 @@ class Sso {
 			{
 				$this->EE->session->create_new_session($user->row('member_id'));
 				
-				$_SESSION['sso_id'] = $user_id;
+				$_SESSION['sso']['sso_id'] = $user_id;
 				
 				$this->EE->functions->redirect('/'.$redirect);
 			}
@@ -213,22 +213,22 @@ class Sso {
 		$tagdata = $this->EE->TMPL->tagdata;
 		
 		// parse conditionals
-		$conditionals['has_sso_id'] = empty($_SESSION['sso_id']) ? FALSE : TRUE;
+		$conditionals['has_sso_id'] = empty($_SESSION['sso']['sso_id']) ? FALSE : TRUE;
 		$tagdata = $this->EE->functions->prep_conditionals($tagdata, $conditionals);
 		
 		// we found a sso id!
-		if( ! empty($_SESSION['sso_id']))
+		if( ! empty($_SESSION['sso']['sso_id']))
 		{
 			// get the user from the sso_accounts table
 			$user = $this->EE->db->get_where('sso_accounts', array(
-				'sso_id' => $_SESSION['sso_id'],
+				'sso_id' => $_SESSION['sso']['sso_id'],
 			), 1);
 			
 			if($user->num_rows() > 0)
 			{
 				// parse the template tags
 				$vars = array(
-					'sso_id' => $_SESSION['sso_id'],
+					'sso_id' => $_SESSION['sso']['sso_id'],
 				);
 				$data = json_decode($user->row('data'));
 				
