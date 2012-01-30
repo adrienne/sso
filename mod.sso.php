@@ -53,7 +53,7 @@ class Sso {
 	 */
 	public function register_start()
 	{
-		$provider = $this->EE->TMPL->fetch_param('provider');
+		$provider = strtolower($this->EE->TMPL->fetch_param('provider'));
 		$callback = $this->EE->TMPL->fetch_param('callback_uri', $this->EE->uri->uri_string());
 		
 		$this->validate_provider($provider);
@@ -72,7 +72,7 @@ class Sso {
 	 */
 	public function register_finish()
 	{
-		$provider = $this->EE->TMPL->fetch_param('provider');
+		$provider = strtolower($this->EE->TMPL->fetch_param('provider'));
 		$redirect = $this->EE->TMPL->fetch_param('redirect');
 		
 		$this->validate_provider($provider);
@@ -153,7 +153,7 @@ class Sso {
 	 */
 	public function login()
 	{
-		$provider = $this->EE->TMPL->fetch_param('provider');
+		$provider = strtolower($this->EE->TMPL->fetch_param('provider'));
 		$redirect = $this->EE->TMPL->fetch_param('redirect');
 		
 		$this->validate_provider($provider);
@@ -245,6 +245,33 @@ class Sso {
 		$tagdata = preg_replace('#\{sso_.+?\}#i', '', $tagdata);
 		
 		return $tagdata;
+	}
+	
+	/**
+	 * Disconnect social account from EE account
+	 *
+	 * <code>
+	 *   {exp:sso:disconnect provider="facebook" redirect="account"}
+	 * </code>
+	 */
+	public function disconnect()
+	{
+		$provider = strtolower($this->EE->TMPL->fetch_param('provider'));
+		$redirect = $this->EE->TMPL->fetch_param('redirect');
+		
+		$this->validate_provider($provider);
+		
+		if($this->EE->session->userdata('member_id') != 0)
+		{
+			$this->EE->db->where(array(
+				'provider' => $provider,
+				'member_id' => $this->EE->session->userdata('member_id'),
+			))->limit(1)->update('sso_accounts', array(
+				'member_id' => NULL,
+			));
+		}
+		
+		$this->EE->functions->redirect('/'.$redirect);
 	}
 	
 	/**
