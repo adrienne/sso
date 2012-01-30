@@ -113,7 +113,10 @@ class Sso_ext {
 	 */
 	public function member_member_logout()
 	{
-		// TODO
+		if( ! empty($_SESSION['sso']))
+		{
+			unset($_SESSION['sso']);
+		}
 	}
 	
 	/**
