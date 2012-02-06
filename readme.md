@@ -74,3 +74,120 @@ This is used to disconnect a third-party provider from a user's account.
 
 * `provider`: The "short name" of the provider to use.
 * `redirect`: The URI to redirect to after successful disconnect.
+
+## Example
+
+_Template for URI **/account/social-register**:_
+
+```
+{!-- redirect logged-in users --}
+{if logged_in}
+	{redirect="/"}
+{/if}
+
+{!-- redirect if no provider is designated --}
+{if segment_3 == ""}
+	{redirect="/"}
+{/if}
+
+{!-- begin the registration process --}
+{if segment_4 != "callback"}
+	{exp:sso:register_start provider="{segment_3}" callback_uri="account/social-register/{segment_3}/callback"}
+{/if}
+
+{!-- finish the registration process --}
+{if segment_4 == "callback"}
+	{exp:sso:register_finish provider="{segment_3}" redirect="account/register"}
+{/if}
+```
+
+_Template for URI **/account/register**:_
+
+```
+{!-- redirect logged-in users --}
+{if logged_in}
+	{redirect="/"}
+{/if}
+
+{!-- allow registration form to be pre-populated --}
+{exp:sso:user_info}
+	{!-- only show this to sso registrants --}
+	{if has_sso_id}
+		<p>Almost done... just complete this form to finish creating your account:</p>
+	{if:else}
+		<p>Register with <a href="{path='account/social-register/facebook'}">Facebook</a> or <a href="{path='account/social-register/twitter'}">Twitter</a>.</p>
+	{/if}
+	
+	{!-- form open --}
+		Name: <input type="text" name="name" value="{sso_name}" /><br />
+		Email: <input type="text" name="email" value="{sso_email}" /><br />
+		Username: <input type="text" name="username" value="{sso_username}" />
+	{!-- form close --}
+{/exp:sso:user_info}
+```
+
+_Template for URI **/account/login**:_
+
+```
+{!-- redirect logged-in users --}
+{if logged_in}
+	{redirect="account"}
+{/if}
+
+<p>Login with <a href="{path='account/social-login/facebook'}">Facebook</a> or <a href="{path='account/social-login/twitter'}">Twitter</a></p>
+```
+
+_Template for URI **/account/social-login**:_
+
+```
+{!-- redirect logged-in users --}
+{if logged_in}
+	{redirect="account"}
+{/if}
+
+{!-- redirect if no provider is designated --}
+{if segment_3 == ""}
+	{redirect="/"}
+{/if}
+
+{exp:sso:login provider="{segment_3}" redirect="account"}
+```
+
+_Template for URI **/account**:_
+
+```
+{!-- redirect logged-out users --}
+{if logged_out}
+	{redirect="/"}
+{/if}
+
+{exp:sso:connections}
+	{if has_facebook}
+		<p><a href="{path='account/social-disconnect/facebook'}">Disconnect Facebook from account</a></p>
+	{if:else}
+		<p><a href="{path='account/social-register/facebook'}">Connect Facebook to account</a></p>
+	{/if}
+	
+	{if has_twitter}
+		<p><a href="{path='account/social-disconnect/twitter'}">Disconnect Twitter from account</a></p>
+	{if:else}
+		<p><a href="{path='account/social-register/twitter'}">Connect Twitter to account</a></p>
+	{/if}
+{/exp:sso:connections}
+```
+
+_Template for URI **/account/social-disconnect**:_
+
+```
+{!-- redirect logged-out users --}
+{if logged_out}
+	{redirect="/"}
+{/if}
+
+{!-- redirect if provider not designated --}
+{if segment_3 == ""}
+	{redirect="/"}
+{/if}
+
+{exp:sso:disconnect provider="{segment_3}" redirect="account"}
+```
