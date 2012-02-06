@@ -26,7 +26,7 @@ class Twitter_provider extends Provider {
 	{
 		parent::__construct();
 		
-		// setup api keys
+		// SET API KEYS FOR PROJECT
 		$this->CONSUMER_KEY = 'CONSUMER_KEY_HERE';
 		$this->CONSUMER_SECRET = 'CONSUMER_SECRET_HERE';
 		
@@ -79,6 +79,7 @@ class Twitter_provider extends Provider {
 			{
 				$user = json_decode($this->twitter->response['response']);
 				
+				// EDIT FIELD MAPPINGS FOR PROJECT
 				$profile = json_encode(array(
 					'first-name' => '',
 					'middle-initial' => '',

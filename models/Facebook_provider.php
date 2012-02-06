@@ -26,7 +26,7 @@ class Facebook_provider extends Provider {
 	{
 		parent::__construct();
 		
-		// setup api keys
+		// SET API KEYS FOR PROJECT
 		$this->APP_ID = 'APP_ID_HERE';
 		$this->APP_SECRET = 'APP_SECRET_HERE';
 		
@@ -69,7 +69,7 @@ class Facebook_provider extends Provider {
 			// get user info from facebook
 			$me = $this->facebook->api('/me');
 			
-			// build profile information
+			// EDIT FIELD MAPPINGS FOR PROJECT
 			$profile = json_encode(array(
 				'first-name' => $me['first_name'],
 				'middle-initial' => '',
