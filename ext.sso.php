@@ -191,14 +191,4 @@ class Sso_ext {
 		}
 	}
 	
-	/**
-	 * Allows easy access to the settings from other classes
-	 *
-	 * @return	array
-	 */
-	public static function get_settings()
-	{
-		return $this->settings;
-	}
-	
 }
