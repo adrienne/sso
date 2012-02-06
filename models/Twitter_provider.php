@@ -7,12 +7,12 @@ class Twitter_provider extends Provider {
 	/**
 	 * @var	string
 	 */
-	const CONSUMER_KEY = 't06FVvkxmELax1SzRZrLSg';
+	private $CONSUMER_KEY;
 	
 	/**
 	 * @var	string
 	 */
-	const CONSUMER_SECRET = 'bAneplyrXeiYfC0O7AckGAe7foyKCiIbPxdPiLriN4';
+	private $CONSUMER_SECRET;
 	
 	/**
 	 * @var	object
@@ -26,10 +26,14 @@ class Twitter_provider extends Provider {
 	{
 		parent::__construct();
 		
+		// setup api keys
+		$this->CONSUMER_KEY = 'CONSUMER_KEY_HERE';
+		$this->CONSUMER_SECRET = 'CONSUMER_SECRET_HERE';
+		
 		// setup sdk
 		$this->twitter = new tmhOAuth(array(
-			'consumer_key' => self::CONSUMER_KEY,
-			'consumer_secret' => self::CONSUMER_SECRET,
+			'consumer_key' => $this->CONSUMER_KEY,
+			'consumer_secret' => $this->CONSUMER_SECRET,
 		));
 	}
 	

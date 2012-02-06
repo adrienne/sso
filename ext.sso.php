@@ -19,7 +19,7 @@ class Sso_ext {
 	/**
 	 * @var	string
 	 */
-	public $description = 'TBD...';
+	public $description = 'Allows users to connect their EE accounts with their social ones.';
 	
 	/**
 	 * @var	string
@@ -81,6 +81,7 @@ class Sso_ext {
 			'member_member_logout' => 'member_member_logout',
 			'user_register_end' => 'user_register_end',
 			'sessions_start' => 'sessions_start',
+			'cp_members_member_delete_end' => 'cp_members_member_delete_end',
 		);
 		
 		foreach($hooks as $hook => $method)
@@ -105,7 +106,7 @@ class Sso_ext {
 	 */
 	public function member_member_login_single($row)
 	{
-		// TODO
+		// do nothing for now
 	}
 	
 	/**
@@ -148,6 +149,24 @@ class Sso_ext {
 		{
 			session_start();
 		}
+		
+		// take off member activation prefs
+		if( ! empty($_SESSION['sso']['sso_id']))
+		{
+			$this->EE->config->set_item('req_mbr_activation', 'none');
+		}
+	}
+	
+	/**
+	 * Deactivate a deleted member's SSO account
+	 */
+	public function cp_members_member_delete_end()
+	{
+		$member_ids = (array) $this->EE->input->post('delete');
+		
+		$this->EE->db->where_in('member_id', $member_ids)->update('sso_accounts', array(
+			'member_id' => NULL,
+		));
 	}
 	
 	/**

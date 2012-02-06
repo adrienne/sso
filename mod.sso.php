@@ -248,6 +248,49 @@ class Sso {
 	}
 	
 	/**
+	 * Allows you to see which connections a user has
+	 *
+	 * <code>
+	 *   {exp:sso:connections user_id="1"}
+	 *     {if has_facebook}...{/if}
+	 *     {if has_twitter}...{/if}
+	 *   {/exp:sso:connections}
+	 * </code>
+	 *
+	 * @return	string
+	 */
+	public function connections()
+	{
+		$tagdata = $this->EE->TMPL->tagdata;
+		$user_id = $this->EE->TMPL->fetch_param('user_id', $this->EE->session->userdata('member_id'));
+		
+		// build the initial conditionals array
+		foreach(static::$providers as $name => $val)
+		{
+			$conditionals['has_'.$name] = FALSE;
+		}
+		
+		$accounts = $this->EE->db->select('sso_id, provider')->get_where('sso_accounts', array(
+			'member_id' => $user_id,
+		));
+		
+		if($accounts->num_rows() > 0)
+		{
+			foreach($accounts->result() as $row)
+			{
+				if(array_key_exists($row->provider, static::$providers))
+				{
+					$conditionals['has_'.$row->provider] = TRUE;
+				}
+			}
+		}
+		
+		$tagdata = $this->EE->functions->prep_conditionals($tagdata, $conditionals);
+		
+		return $tagdata;
+	}
+	
+	/**
 	 * Disconnect social account from EE account
 	 *
 	 * <code>

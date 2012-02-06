@@ -7,12 +7,12 @@ class Facebook_provider extends Provider {
 	/**
 	 * @var	string
 	 */
-	const APP_ID = '354745324553617';
+	private $APP_ID;
 	
 	/**
 	 * @var	string
 	 */
-	const APP_SECRET = 'beb2ee995165fb0da4cc47964ab01881';
+	private $APP_SECRET;
 	
 	/**
 	 * @var array
@@ -26,10 +26,14 @@ class Facebook_provider extends Provider {
 	{
 		parent::__construct();
 		
+		// setup api keys
+		$this->APP_ID = 'APP_ID_HERE';
+		$this->APP_SECRET = 'APP_SECRET_HERE';
+		
 		// setup sdk
 		$this->facebook = new Facebook(array(
-			'appId' => self::APP_ID,
-			'secret' => self::APP_SECRET,
+			'appId' => $this->APP_ID,
+			'secret' => $this->APP_SECRET,
 		));
 	}
 	
